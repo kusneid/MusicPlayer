@@ -1,0 +1,3 @@
+C:/Users/kusneid/Documents/MusicPlayer/build/CMakeFiles/MusicPlayer.dir
+C:/Users/kusneid/Documents/MusicPlayer/build/CMakeFiles/edit_cache.dir
+C:/Users/kusneid/Documents/MusicPlayer/build/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,8 @@
+[
+{
+  "directory": "C:/Users/kusneid/Documents/MusicPlayer/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/MusicPlayer.dir/includes_CXX.rsp -g -o CMakeFiles\\MusicPlayer.dir\\src\\main.cpp.obj -c C:\\Users\\kusneid\\Documents\\MusicPlayer\\src\\main.cpp",
+  "file": "C:/Users/kusneid/Documents/MusicPlayer/src/main.cpp",
+  "output": "CMakeFiles/MusicPlayer.dir/src/main.cpp.obj"
+}
+]
