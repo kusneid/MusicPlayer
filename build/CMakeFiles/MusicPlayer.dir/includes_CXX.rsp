@@ -1,1 +1,1 @@
--IC:/Users/kusneid/Documents/MusicPlayer/include -isystem C:/Users/kusneid/Documents/MusicPlayer/SFML/include
+-IC:/Users/kusneid/Documents/MusicPlayer/include -I"C:/Users/kusneid/Documents/MusicPlayer/build/_deps/sfml-src/include"
