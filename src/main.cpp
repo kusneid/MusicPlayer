@@ -1,27 +1,15 @@
-//здесь просто надо срендерить окно плеера
-#include <SFML/Graphics.hpp>
+#include "SFML/Graphics.hpp"
+#include "ui/ui.h"
 
-
-//здесь просто окно плеера надо вывести будет, а пока тест работы сфмл
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
+    system("chcp 65001");
 
-    while (window.isOpen())
-    {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
+    sf::RenderWindow window(sf::VideoMode(INITIAL_WINDOW_RESOLUTION_X, INITIAL_WINDOW_RESOLUTION_Y), "Music Player", sf::Style::Titlebar | sf::Style::Close);//временно(или нет) ограничил границы окна
+    
+    uiResources::ResourceManager resourceManager;
 
-        window.clear();
-        window.draw(shape);
-        window.display();
-    }
-
-    return 0;
+    return gui::GUIRenderBase(window, resourceManager);
 }
+
+//по возможности сюда больше ниче не добавлять

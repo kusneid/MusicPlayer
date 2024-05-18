@@ -33,12 +33,16 @@ include_directories(include)
 add_executable(MusicPlayer ${SOURCES} ${HEADERS})#!!!!!!!!!!!!!!!!!
 
 #если юзаете какую-то из библиотек сфмльных сюда кидайте
-target_link_libraries(MusicPlayer PRIVATE sfml-graphics)
+target_link_libraries(MusicPlayer PRIVATE sfml-graphics sfml-audio)
 target_compile_features(MusicPlayer PRIVATE cxx_std_17)
 
 #копирование иконок в билд, так легче
 file(GLOB ICONS "resources/icons/*.png")
 file(COPY ${ICONS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/icons)
+
+#тоже самое с шрифтом
+file(GLOB FONTS "resources/fonts/*.ttf")
+file(COPY ${FONTS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/fonts)
 
 #для сфмл
 if(WIN32)
@@ -54,3 +58,5 @@ install(TARGETS MusicPlayer)
 
 #закидывает иконки в билд
 install(FILES ${ICONS} DESTINATION build/icons)
+install(FILES ${FONTS} DESTINATION build/fonts)
+
