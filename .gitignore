@@ -1,6 +1,3 @@
-# Created by https://www.toptal.com/developers/gitignore/api/c++,visualstudiocode,clion+all
-# Edit at https://www.toptal.com/developers/gitignore?templates=c++,visualstudiocode,clion+all
-
 ### C++ ###
 # Prerequisites
 *.d
@@ -35,7 +32,7 @@
 *.out
 *.app
 
-### CLion+all ###
+### CLion ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
@@ -114,12 +111,56 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
-### CLion+all Patch ###
-# Ignore everything but code style settings and run configurations
-# that are supposed to be shared within teams.
+### CLion Patch ###
+# Comment Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-215987721
 
-.idea/*
+# *.iml
+# modules.xml
+# .idea/misc.xml
+# *.ipr
 
+# Sonarlint plugin
+# https://plugins.jetbrains.com/plugin/7973-sonarlint
+.idea/**/sonarlint/
+
+# SonarQube Plugin
+# https://plugins.jetbrains.com/plugin/7238-sonarqube-community-plugin
+.idea/**/sonarIssues.xml
+
+# Markdown Navigator plugin
+# https://plugins.jetbrains.com/plugin/7896-markdown-navigator-enhanced
+.idea/**/markdown-navigator.xml
+.idea/**/markdown-navigator-enh.xml
+.idea/**/markdown-navigator/
+
+# Cache file creation bug
+# See https://youtrack.jetbrains.com/issue/JBR-2257
+.idea/$CACHE_FILE$
+
+# CodeStream plugin
+# https://plugins.jetbrains.com/plugin/12206-codestream
+.idea/codestream.xml
+
+# Azure Toolkit for IntelliJ plugin
+# https://plugins.jetbrains.com/plugin/8053-azure-toolkit-for-intellij
+.idea/**/azureSettings.xml
+
+### CMake ###
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+### CMake Patch ###
+# External projects
+*-prefix/
 
 ### VisualStudioCode ###
 .vscode/*
@@ -136,6 +177,5 @@ fabric.properties
 .history
 .ionide
 
-# End of https://www.toptal.com/developers/gitignore/api/c++,visualstudiocode,clion+all
 
 build/*
