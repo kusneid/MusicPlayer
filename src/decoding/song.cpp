@@ -42,8 +42,8 @@ bool Song::empty() {
 }
 
 
-void Song::playback() {
-    if (!music.openFromFile(name)){
+void Song::playback(const std::string &name_directory) {
+    if (!music.openFromFile(name_directory + "\\" + name + ".flac") && !music.openFromFile(name_directory + "\\" + name + ".ogg")){
         std::cout << "Song not found!\n";
         return;
     }

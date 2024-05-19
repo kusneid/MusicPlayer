@@ -1,9 +1,11 @@
 #include "decoding/album.h"
 #include <filesystem>
+#include <string>
+#include <iostream>
 
 namespace fs = std::filesystem;
 
-Song Album::getSong(int i) {
+Song &Album::getSong(int i) {
     if (i < list.size()){
         return list[i];
     }
@@ -22,12 +24,13 @@ void Album::delete_track(const Song &track) {
 void Album::getMusicFiles(const std::string &directory) {
     int i = 0;
     Song track;
-    std::string extension;
+    std::string extension, buf;
     for (const auto& entry : fs::directory_iterator(directory)) {
         if (entry.is_regular_file()) {
             extension = entry.path().extension().string();
-            if (extension == ".wav" || extension == ".ogg" || extension == ".flac") { // здесь указываем расширения, с которыми будет работать наш плеер
-                track.set_name(entry.path().string());
+            if (extension == ".ogg" || extension == ".flac") { // здесь указываем расширения, с которыми будет работать наш плеер
+                buf = entry.path().string().substr(0,size(entry.path().string()) - size(extension));
+                track.set_name(buf.substr(size(directory) + 1));
                 list.push_back(track);
             }
         }
