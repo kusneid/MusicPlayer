@@ -1,8 +1,8 @@
 #include "ui/ui.h"
 #include "decoding/album.h"
 
-Song current_track;
 Album playlist;
+std::string name_directory;
 int i = 0;
 
 uiResources::ResourceManager::ResourceManager()
@@ -65,7 +65,8 @@ namespace gui
 {
   int GUIRenderBase(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager)
   {
-    playlist.getMusicFiles("Music"); // забираем названия песен
+      std::cin >> name_directory;
+    playlist.getMusicFiles(name_directory); // забираем названия песен
     for (int j = 0; j < playlist.getSize(); j++)
     {
       std::cout << playlist.getSong(j).get_name() << '\n';
@@ -223,31 +224,26 @@ namespace gui
         if (prevButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
           std::cout << "prev" << std::endl;
-          current_track.pause();
+          playlist.getSong(i).pause();
           i--;
-          current_track = playlist.getSong(i);
-          current_track.playback();
+          playlist.getSong(i).playback(name_directory);
         }
         else if (playButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
           std::cout << "play" << std::endl;
-          current_track = playlist.getSong(i);
-          std::cout << current_track.get_status() << '\n';
-          if (!current_track.get_status()){
-              current_track.playback();
+          if (!playlist.getSong(i).get_status()){
+              playlist.getSong(i).playback(name_directory);
           }
           else{
-              current_track.pause();
+              playlist.getSong(i).pause();
           }
         }
         else if (nextButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
           std::cout << "next" << std::endl;
-          std::cout << current_track.get_status() << '\n';
-          current_track.pause();
+          playlist.getSong(i).pause();
           i++;
-          current_track = playlist.getSong(i);
-          current_track.playback();
+          playlist.getSong(i).playback(name_directory);
         }
 
         sliderPressed = false;

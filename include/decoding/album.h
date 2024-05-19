@@ -6,7 +6,7 @@ class Album{
 private:
     std::vector <Song> list;
 public:
-    Song getSong(int i);
+    Song &getSong(int i);
     int getSize();
 
     void add_track(const Song &track);

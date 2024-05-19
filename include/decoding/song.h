@@ -19,6 +19,6 @@ public:
     bool empty();
 
 
-    void playback();
+    void playback(const std::string &name_directory);
     void pause();
 };
