@@ -33,3 +33,7 @@ void Album::getMusicFiles(const std::string &directory) {
         }
     }
 }
+
+std::vector<Song> Album::getList(){
+    return list;
+}

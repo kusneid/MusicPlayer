@@ -71,7 +71,6 @@ namespace gui
       std::cout << playlist.getSong(j).get_name() << '\n';
     }
 
-
     bool iconLoaded = false;
     if (!iconLoaded)
     {
@@ -92,7 +91,7 @@ namespace gui
 
     while (window.isOpen())
     {
-      sf::Event event;
+      static sf::Event event;
       while (window.pollEvent(event))
       {
         if (event.type == sf::Event::Closed)
@@ -104,13 +103,13 @@ namespace gui
       window.clear(sf::Color::Black);
       window.draw(backgroundSprite);
 
-      if (CurrentTrackControlGUI(window, resourceManager, event) != 0)
+      if (PlaylistsGUI(window, resourceManager, event) != 0)
       {
         throw std::runtime_error("unable to render gui of track control");
         return -1;
       }
 
-      if (PlaylistsGUI(window, resourceManager, event) != 0)
+      if (CurrentTrackControlGUI(window, resourceManager, event) != 0)
       {
         throw std::runtime_error("unable to render gui of track control");
         return -1;
@@ -142,7 +141,7 @@ namespace gui
     {
       float bottomStart = BOTTOM_LINE;
 
-      std::string songNameFull = "Artist - Song"; // = исполнитель - трек
+      std::string songNameFull = "Select song to play"; // = исполнитель - трек
       sName.setFont(resourceManager.GetFont());
       sName.setString(songNameFull);
       sName.setCharacterSize(40);
@@ -172,10 +171,9 @@ namespace gui
       volumeSlider.setPosition(startX + 6 * (buttonSize.x + buttonSpacing), bottomStart + (buttonSize.y - volumeSize.y));
 
       volumeDot.setRadius(10.f);
-      volumeDot.setFillColor(sf::Color::Red);
-      volumeDot.setPosition(volumeSlider.getPosition().x, volumeSlider.getPosition().y - 3.f);
-
-      volumeDotCurrentX = volumeDot.getPosition().x;
+      volumeDot.setFillColor(sf::Color::Cyan);
+      volumeDotCurrentX = volumeSlider.getPosition().x + (volumeSlider.getSize().x / 2.f) - volumeDot.getRadius();
+      volumeDot.setPosition(volumeDotCurrentX, volumeSlider.getPosition().y - 3.f);
 
       initialized = true;
     }
@@ -198,8 +196,8 @@ namespace gui
 
       volumeDotCurrentX = newX;
 
-      float volumeLevel = (newX - sliderStartX) / (sliderEndX - sliderStartX) * 100;
-      std::cout << "Volume: " << volumeLevel << std::endl;
+      float volumeLevel = (newX - sliderStartX) / (sliderEndX - sliderStartX);
+      current_track.get_sfMusic().setVolume(volumeLevel * 200);
     }
 
     volumeDot.setPosition(volumeDotCurrentX, volumeDot.getPosition().y);
@@ -227,18 +225,23 @@ namespace gui
           i--;
           current_track = playlist.getSong(i);
           current_track.playback();
+
+          sName.setString(current_track.get_name());
         }
         else if (playButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
           std::cout << "play" << std::endl;
           current_track = playlist.getSong(i);
           std::cout << current_track.get_status() << '\n';
-          if (!current_track.get_status()){
-              current_track.playback();
+          if (!current_track.get_status())
+          {
+            current_track.playback();
           }
-          else{
-              current_track.pause();
+          else
+          {
+            current_track.pause();
           }
+          sName.setString(current_track.get_name()); // меняет название в интерфейсе слева сверху
         }
         else if (nextButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
@@ -248,6 +251,8 @@ namespace gui
           i++;
           current_track = playlist.getSong(i);
           current_track.playback();
+
+          sName.setString(current_track.get_name());
         }
 
         sliderPressed = false;
@@ -272,9 +277,10 @@ namespace gui
 
     static bool initialized = false;
     static float scrollOffset = 0.f;
+    static float maxScrollOffset = 0.f;
 
-    static std::vector<std::string> trackList = {"Track 1", "Track 2", "Track 3", "Track 4", "Track 5"};
-    // здесь надо будет заполнить треками все
+    static std::vector<sf::Text> trackTexts;
+    static std::vector<sf::RectangleShape> trackBoundaries;
 
     if (!initialized)
     {
@@ -292,35 +298,64 @@ namespace gui
       sf::Vector2i mousePos = sf::Mouse::getPosition(window);
       if (openFolderButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
       {
-        // open folder
+        
+        trackTexts.clear();
+        trackBoundaries.clear();
+
+        std::vector<std::string> trackList = {"Track 1", "Track 2", "Track 3", "Track 4", "Track 5", "Track 6", "Track 7", "Track 8", "Track 9", "Track 10"};
+        for (const auto &j : playlist.getList())
+        {
+          trackList.push_back(j.get_name());
+        }
+
+        float yOffset = boundaryLine.getPosition().y + 50.f;
+        for (size_t i = 0; i < trackList.size(); ++i)
+        {
+          sf::Text text(trackList[i], resourceManager.GetFont(), 30);
+          text.setFillColor(sf::Color::Black); 
+          text.setPosition(400.f, yOffset + i * 40.f);
+          trackTexts.push_back(text);
+
+          sf::RectangleShape trackBoundary(sf::Vector2f(600.f, 2.f));  
+          trackBoundary.setFillColor(sf::Color::Black);                
+          trackBoundary.setPosition(400.f, yOffset + i * 40.f + 35.f);
+          trackBoundaries.push_back(trackBoundary);
+        }
+
+        maxScrollOffset = std::max(0.f, yOffset + trackList.size() * 40.f - window.getSize().y + 150.f);
+        scrollOffset = 0.f;
       }
     }
+
     if (event.type == sf::Event::MouseWheelScrolled)
     {
-      scrollOffset += event.mouseWheelScroll.delta * 30.f;
+      scrollOffset += event.mouseWheelScroll.delta * -10.f; 
       if (scrollOffset < 0)
       {
         scrollOffset = 0;
       }
+      else if (scrollOffset > maxScrollOffset)
+      {
+        scrollOffset = maxScrollOffset;
+      }
     }
 
-    float yOffset = boundaryLine.getPosition().y + 50.f;
-    for (size_t i = 0; i < trackList.size(); ++i)
+    for (size_t i = 0; i < trackTexts.size(); ++i)
     {
-      sf::Text text(trackList[i], resourceManager.GetFont(), 20);
-      text.setPosition(400.f, yOffset + scrollOffset + i * 30.f);
-      window.draw(text);
-
-      sf::RectangleShape trackBoundary(sf::Vector2f(600.f, 1.f));
-      trackBoundary.setFillColor(sf::Color::White);
-      trackBoundary.setPosition(400.f, yOffset + scrollOffset + i * 30.f + 25.f);
-      window.draw(trackBoundary);
+      float textY = boundaryLine.getPosition().y + 50.f - scrollOffset + i * 40.f;
+      if (textY > 175.f && textY < window.getSize().y)
+      {
+        trackTexts[i].setPosition(400.f, textY);
+        trackBoundaries[i].setPosition(400.f, textY + 35.f);
+        window.draw(trackTexts[i]);
+        window.draw(trackBoundaries[i]);
+      }
     }
 
     window.draw(openFolderButton);
-
     window.draw(boundaryLine);
 
     return 0;
   }
+
 }

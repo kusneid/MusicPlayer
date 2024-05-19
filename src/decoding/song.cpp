@@ -31,7 +31,7 @@ bool Song::get_status() {
 void Song::set_name(const std::string &name_) {
     name = name_;
 }
-std::string Song::get_name() {
+std::string Song::get_name() const{
     return name;
 }
 bool Song::empty() {
@@ -53,4 +53,8 @@ void Song::playback() {
 void Song::pause(){
     music.pause();
     isPlaying = false;
+}
+
+sf::Music& Song::get_sfMusic(){
+    return music;
 }

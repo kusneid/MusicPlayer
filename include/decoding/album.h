@@ -13,4 +13,7 @@ public:
     void delete_track(const Song &track);
 
     void getMusicFiles(const std::string &directory);
+
+
+    std::vector<Song> getList();
 };
