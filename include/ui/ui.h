@@ -10,6 +10,10 @@
 #define INITIAL_WINDOW_RESOLUTION_Y 720
 #define INITIAL_WINDOW_RESOLUTION_X 1280 
 
+#define DEFAULT_BUTTON_SIZE 65.f
+
+#define BOTTOM_LINE 50.f
+
 namespace uiResources
 {
   class ResourceManager{
@@ -29,4 +33,5 @@ namespace gui{
   int GUIRenderBase(sf::RenderWindow& window, uiResources::ResourceManager& resourceManager);
   int CurrentTrackControlGUI(sf::RenderWindow& window, uiResources::ResourceManager& resourceManager, sf::Event& event);
   int PlaylistsGUI(sf::RenderWindow& window, uiResources::ResourceManager& resourceManager,sf::Event& event);
+  int UpdatePlaylist(sf::RenderWindow& window);
 } // namespace gui

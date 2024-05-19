@@ -61,7 +61,7 @@ namespace gui
 {
   int GUIRenderBase(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager)
   {
-    
+
     bool iconLoaded = false;
     if (!iconLoaded)
     {
@@ -100,6 +100,12 @@ namespace gui
         return -1;
       }
 
+      if (PlaylistsGUI(window, resourceManager, event) != 0)
+      {
+        throw std::runtime_error("unable to render gui of track control");
+        return -1;
+      }
+
       window.display();
     }
 
@@ -124,7 +130,7 @@ namespace gui
 
     if (!initialized)
     {
-      float bottomStart = 50.f;
+      float bottomStart = BOTTOM_LINE;
 
       std::string songNameFull = "Artist - Song"; // = исполнитель - трек
       sName.setFont(resourceManager.GetFont());
@@ -134,7 +140,7 @@ namespace gui
       sName.setPosition(40.f, bottomStart);
 
       float buttonS = 65.f;
-      sf::Vector2f buttonSize(buttonS, buttonS);
+      sf::Vector2f buttonSize(DEFAULT_BUTTON_SIZE, DEFAULT_BUTTON_SIZE);
       sf::Vector2f volumeSize(200.f, 15.f);
       float buttonSpacing = 30.f;
       float startX = 480.f;
@@ -168,7 +174,7 @@ namespace gui
     {
       sf::Vector2i mousePos = sf::Mouse::getPosition(window);
       float newX = static_cast<float>(mousePos.x);
-      float sliderStartX = volumeDot.getPosition().x;
+      float sliderStartX = volumeSlider.getPosition().x;
       float sliderEndX = sliderStartX + volumeSlider.getSize().x - 2 * volumeDot.getRadius();
 
       if (newX < sliderStartX)
@@ -182,8 +188,8 @@ namespace gui
 
       volumeDotCurrentX = newX;
 
-      float volumeLevel = (newX - sliderStartX) / volumeSlider.getSize().x * 10 / 9 * 100;
-      std::cout << volumeLevel;
+      float volumeLevel = (newX - sliderStartX) / (sliderEndX - sliderStartX) * 100;
+      std::cout << "Volume: " << volumeLevel << std::endl;
     }
 
     volumeDot.setPosition(volumeDotCurrentX, volumeDot.getPosition().y);
@@ -214,15 +220,12 @@ namespace gui
           {
             playButton.setTexture(resourceManager.GetTexture("pause"));
             musicIsPlaying = true;
-
           }
           else
           {
             playButton.setTexture(resourceManager.GetTexture("play"));
             musicIsPlaying = false;
-        
           }
-
         }
         else if (nextButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
@@ -246,6 +249,60 @@ namespace gui
 
   int PlaylistsGUI(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager, sf::Event &event)
   {
+    static sf::Sprite openFolderButton(resourceManager.GetTexture("open_folder"));
+    static sf::RectangleShape boundaryLine(sf::Vector2f(window.getSize().x, 3.f));
+
+    static bool initialized = false;
+    static float scrollOffset = 0.f;
+
+    static std::vector<std::string> trackList = {"Track 1", "Track 2", "Track 3", "Track 4", "Track 5"};
+    // здесь надо будет заполнить треками все
+
+    if (!initialized)
+    {
+      openFolderButton.setPosition(30.f, window.getSize().y - 100.f);
+      openFolderButton.setScale(DEFAULT_BUTTON_SIZE / openFolderButton.getTexture()->getSize().x, DEFAULT_BUTTON_SIZE / openFolderButton.getTexture()->getSize().y);
+
+      boundaryLine.setFillColor(sf::Color::Blue);
+      boundaryLine.setPosition(0.f, BOTTOM_LINE * 3.5);
+
+      initialized = true;
+    }
+
+    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+    {
+      sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+      if (openFolderButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
+      {
+        //open folder
+      }
+    }
+    if (event.type == sf::Event::MouseWheelScrolled)
+    {
+      scrollOffset += event.mouseWheelScroll.delta * 30.f;
+      if (scrollOffset < 0)
+      {
+        scrollOffset = 0;
+      }
+    }
+
+    float yOffset = boundaryLine.getPosition().y+50.f;
+    for (size_t i = 0; i < trackList.size(); ++i)
+    {
+      sf::Text text(trackList[i], resourceManager.GetFont(), 20);
+      text.setPosition(400.f, yOffset + scrollOffset + i * 30.f);
+      window.draw(text);
+
+      sf::RectangleShape trackBoundary(sf::Vector2f(600.f, 1.f));
+      trackBoundary.setFillColor(sf::Color::White);
+      trackBoundary.setPosition(400.f, yOffset + scrollOffset + i * 30.f + 25.f);
+      window.draw(trackBoundary);
+    }
+
+    window.draw(openFolderButton);
+
+    window.draw(boundaryLine);
+
     return 0;
   }
 }
