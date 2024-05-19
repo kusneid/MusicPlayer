@@ -28,4 +28,5 @@ namespace uiResources
 namespace gui{
   int GUIRenderBase(sf::RenderWindow& window, uiResources::ResourceManager& resourceManager);
   int CurrentTrackControlGUI(sf::RenderWindow& window, uiResources::ResourceManager& resourceManager, sf::Event& event);
+  int PlaylistsGUI(sf::RenderWindow& window, uiResources::ResourceManager& resourceManager,sf::Event& event);
 } // namespace gui

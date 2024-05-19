@@ -5,7 +5,9 @@ int main()
 {
     system("chcp 65001");
 
-    sf::RenderWindow window(sf::VideoMode(INITIAL_WINDOW_RESOLUTION_X, INITIAL_WINDOW_RESOLUTION_Y), "Music Player", sf::Style::Titlebar | sf::Style::Close);//временно(или нет) ограничил границы окна
+    sf::RenderWindow window(sf::VideoMode(INITIAL_WINDOW_RESOLUTION_X, INITIAL_WINDOW_RESOLUTION_Y), "Music Player", sf::Style::Titlebar | sf::Style::Close);
+
+        
     
     uiResources::ResourceManager resourceManager;
 

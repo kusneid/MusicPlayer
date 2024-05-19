@@ -61,6 +61,24 @@ namespace gui
 {
   int GUIRenderBase(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager)
   {
+    
+    bool iconLoaded = false;
+    if (!iconLoaded)
+    {
+      sf::Image icon;
+      if (!icon.loadFromFile("../icons/icon.png"))
+      {
+        std::cerr << "Error loading icon" << std::endl;
+        return -1;
+      }
+      window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
+      iconLoaded = true;
+    }
+
+    sf::Sprite backgroundSprite(resourceManager.GetTexture("background"));
+    backgroundSprite.setScale(
+        static_cast<float>(window.getSize().x) / resourceManager.GetTexture("background").getSize().x,
+        static_cast<float>(window.getSize().y) / resourceManager.GetTexture("background").getSize().y);
 
     while (window.isOpen())
     {
@@ -73,11 +91,13 @@ namespace gui
         }
       }
 
-      window.clear(sf::Color::Yellow);
+      window.clear(sf::Color::Black);
+      window.draw(backgroundSprite);
 
       if (CurrentTrackControlGUI(window, resourceManager, event) != 0)
       {
         throw std::runtime_error("unable to render gui of track control");
+        return -1;
       }
 
       window.display();
@@ -88,67 +108,68 @@ namespace gui
 
   int CurrentTrackControlGUI(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager, sf::Event &event)
   {
-    sf::Vector2f currentWindowSize{INITIAL_WINDOW_RESOLUTION_X, INITIAL_WINDOW_RESOLUTION_Y};
-    sf::Vector2f scaleFactor(1.f, 1.f);
+    static bool initialized = false;
+    static float volumeDotCurrentX = 0.0f;
+    static bool musicIsPlaying = false;
 
-    if (event.type == sf::Event::Resized)
+    static bool mousePressed = false;
+    static bool sliderPressed = false;
+
+    static sf::Text sName;
+    static sf::Sprite prevButton;
+    static sf::Sprite playButton;
+    static sf::Sprite nextButton;
+    static sf::RectangleShape volumeSlider;
+    static sf::CircleShape volumeDot;
+
+    if (!initialized)
     {
-      currentWindowSize = sf::Vector2f(event.size.width, event.size.height);
-      scaleFactor.x = currentWindowSize.x / INITIAL_WINDOW_RESOLUTION_X;
-      scaleFactor.y = currentWindowSize.y / INITIAL_WINDOW_RESOLUTION_Y;
+      float bottomStart = 50.f;
+
+      std::string songNameFull = "Artist - Song"; // = исполнитель - трек
+      sName.setFont(resourceManager.GetFont());
+      sName.setString(songNameFull);
+      sName.setCharacterSize(40);
+      sName.setFillColor(sf::Color::Black);
+      sName.setPosition(40.f, bottomStart);
+
+      float buttonS = 65.f;
+      sf::Vector2f buttonSize(buttonS, buttonS);
+      sf::Vector2f volumeSize(200.f, 15.f);
+      float buttonSpacing = 30.f;
+      float startX = 480.f;
+
+      prevButton.setTexture(resourceManager.GetTexture("prev"));
+      prevButton.setPosition(startX, bottomStart);
+      prevButton.setScale(buttonSize.x / prevButton.getTexture()->getSize().x, buttonSize.y / prevButton.getTexture()->getSize().y);
+
+      playButton.setTexture(resourceManager.GetTexture("play"));
+      playButton.setPosition(startX + (buttonSize.x + buttonSpacing), bottomStart);
+      playButton.setScale(buttonSize.x / playButton.getTexture()->getSize().x, buttonSize.y / playButton.getTexture()->getSize().y);
+
+      nextButton.setTexture(resourceManager.GetTexture("next"));
+      nextButton.setPosition(startX + 2 * (buttonSize.x + buttonSpacing), bottomStart);
+      nextButton.setScale(buttonSize.x / nextButton.getTexture()->getSize().x, buttonSize.y / nextButton.getTexture()->getSize().y);
+
+      volumeSlider.setSize(volumeSize);
+      volumeSlider.setFillColor(sf::Color::Black);
+      volumeSlider.setPosition(startX + 6 * (buttonSize.x + buttonSpacing), bottomStart + (buttonSize.y - volumeSize.y));
+
+      volumeDot.setRadius(10.f);
+      volumeDot.setFillColor(sf::Color::Red);
+      volumeDot.setPosition(volumeSlider.getPosition().x, volumeSlider.getPosition().y - 3.f);
+
+      volumeDotCurrentX = volumeDot.getPosition().x;
+
+      initialized = true;
     }
 
-    float bottomStart = 50.f * scaleFactor.y;
-
-    std::string songNameFull = "Artist - Song"; // = исполнитель - трек
-    sf::Text sName{songNameFull, resourceManager.GetFont(), 40 * static_cast<unsigned int>(scaleFactor.x)};
-    sName.setFillColor(sf::Color::Black);
-    sName.setPosition(40.f, bottomStart);
-
-    float buttonS = 65.f * scaleFactor.x;
-
-    sf::Vector2f buttonSize(buttonS, buttonS);
-    sf::Vector2f volumeSize(200.f, 15.f);
-
-    float buttonSpacing = 30.f;
-    float startX = 480.f * scaleFactor.x;
-
-    // std::variant<sf::Texture>(resourceManager.GetTexture("play"),resourceManager.GetTexture("pause"));
-
-    sf::Sprite prevButton(resourceManager.GetTexture("prev"));
-    prevButton.setPosition(startX, bottomStart);
-    prevButton.setScale(buttonSize.x / prevButton.getTexture()->getSize().x * scaleFactor.x, buttonSize.y / prevButton.getTexture()->getSize().y * scaleFactor.y);
-
-    sf::Sprite playButton(resourceManager.GetTexture("play"));
-    playButton.setPosition(startX + (buttonSize.x + buttonSpacing) * scaleFactor.x, bottomStart);
-    playButton.setScale(buttonSize.x / playButton.getTexture()->getSize().x * scaleFactor.x, buttonSize.y / playButton.getTexture()->getSize().y * scaleFactor.y);
-
-    sf::Sprite nextButton(resourceManager.GetTexture("next"));
-    nextButton.setPosition(startX + 2 * (buttonSize.x + buttonSpacing) * scaleFactor.x, bottomStart);
-    nextButton.setScale(buttonSize.x / nextButton.getTexture()->getSize().x, buttonSize.y / nextButton.getTexture()->getSize().y * scaleFactor.y);
-
-
-      // тут пока хз как реализовывать!!!!!!!!
-    sf::RectangleShape volumeSlider(volumeSize);
-    volumeSlider.setFillColor(sf::Color::Black);
-    volumeSlider.setPosition(startX + 6 * (buttonSize.x + buttonSpacing) * scaleFactor.x, bottomStart + (buttonSize.y - volumeSize.y) * scaleFactor.y / 2);
-
-    sf::CircleShape volumeDot(10.f * scaleFactor.x);
-    volumeDot.setFillColor(sf::Color::Red);
-    volumeDot.setPosition(volumeSlider.getPosition().x,volumeSlider.getPosition().y - 3.f);//!!!!!scalefactor
-
-
-    static bool sliderPressed = false;
-    static bool mousePressed = false;
-
-    
-    static float volumeDotCurrentX = volumeDot.getPosition().x;
     if (sliderPressed && mousePressed)
     {
       sf::Vector2i mousePos = sf::Mouse::getPosition(window);
       float newX = static_cast<float>(mousePos.x);
-      float sliderStartX = volumeDot.getPosition().x;//???????zato 
-      float sliderEndX = sliderStartX + volumeSlider.getSize().x - 2*volumeDot.getRadius();
+      float sliderStartX = volumeDot.getPosition().x;
+      float sliderEndX = sliderStartX + volumeSlider.getSize().x - 2 * volumeDot.getRadius();
 
       if (newX < sliderStartX)
       {
@@ -160,16 +181,13 @@ namespace gui
       }
 
       volumeDotCurrentX = newX;
-      
-      
-      float volumeLevel = (newX - sliderStartX) / volumeSlider.getSize().x*10/9     *100;
-      std::cout <<volumeLevel;
+
+      float volumeLevel = (newX - sliderStartX) / volumeSlider.getSize().x * 10 / 9 * 100;
+      std::cout << volumeLevel;
     }
-    
-    volumeDot.setPosition(volumeDotCurrentX,volumeDot.getPosition().y);
-    
-    
-    
+
+    volumeDot.setPosition(volumeDotCurrentX, volumeDot.getPosition().y);
+
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
     {
       mousePressed = true;
@@ -192,33 +210,42 @@ namespace gui
         }
         else if (playButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
-          std::cout << "play" << std::endl;
+          if (!musicIsPlaying)
+          {
+            playButton.setTexture(resourceManager.GetTexture("pause"));
+            musicIsPlaying = true;
+
+          }
+          else
+          {
+            playButton.setTexture(resourceManager.GetTexture("play"));
+            musicIsPlaying = false;
+        
+          }
+
         }
         else if (nextButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
           std::cout << "next" << std::endl;
         }
-        
+
         sliderPressed = false;
         mousePressed = false;
       }
     }
 
-    
-    
-    
-
-
     window.draw(sName);
-
     window.draw(playButton);
-    // window.draw(pauseButton);
     window.draw(nextButton);
     window.draw(prevButton);
-
     window.draw(volumeSlider);
     window.draw(volumeDot);
 
+    return 0;
+  }
+
+  int PlaylistsGUI(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager, sf::Event &event)
+  {
     return 0;
   }
 }
