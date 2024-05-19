@@ -1,5 +1,9 @@
 #include "ui/ui.h"
-#include "decoding/song.h"
+#include "decoding/album.h"
+
+Song current_track;
+Album playlist;
+int i = 0;
 
 uiResources::ResourceManager::ResourceManager()
 {
@@ -61,7 +65,10 @@ namespace gui
 {
   int GUIRenderBase(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager)
   {
-
+      playlist.getMusicFiles("Music"); //забираем названия песен
+      for (int j = 0; j < playlist.getSize(); j++){
+          std::cout << playlist.getSong(j).get_name() << '\n';
+      }
     while (window.isOpen())
     {
       sf::Event event;
@@ -189,14 +196,31 @@ namespace gui
         if (prevButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
           std::cout << "prev" << std::endl;
+          current_track.pause();
+          i--;
+          current_track = playlist.getSong(i);
+          current_track.playback();
         }
         else if (playButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
           std::cout << "play" << std::endl;
+          current_track = playlist.getSong(i);
+          std::cout << current_track.get_status() << '\n';
+          if (!current_track.get_status()){
+              current_track.playback();
+          }
+          else{
+              current_track.pause();
+          }
         }
         else if (nextButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
           std::cout << "next" << std::endl;
+          std::cout << current_track.get_status() << '\n';
+          current_track.pause();
+          i++;
+          current_track = playlist.getSong(i);
+          current_track.playback();
         }
         
         sliderPressed = false;
