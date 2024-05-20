@@ -6,7 +6,7 @@ Album playlist;
 
 int indexOfCurrentTrack = 0;
 
-std::string currentDirectory = "../../Music";
+std::string currentDirectory = "Music";
 
 uiResources::ResourceManager::ResourceManager()
 {
@@ -66,7 +66,22 @@ sf::Font &uiResources::ResourceManager::GetFont()
 
 namespace gui
 {
-
+    void rewind(Album& playlist, int& indexOfCurrentTrack, bool direction){
+        playlist.getSong(indexOfCurrentTrack).pause();
+        if (direction){
+            indexOfCurrentTrack++;
+            if (indexOfCurrentTrack == playlist.getSize()){
+                indexOfCurrentTrack = 0;
+            }
+        }
+        else{
+            indexOfCurrentTrack--;
+            if (indexOfCurrentTrack < 0){
+                indexOfCurrentTrack = playlist.getSize() - 1;
+            }
+        }
+        playlist.getSong(indexOfCurrentTrack).playback(sf::seconds(0));
+    }
   GUISong::GUISong(Song s, sf::Text t) : songClass(s), songNameSF(t) {}
 
   int GUIRenderBase(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager)
@@ -147,6 +162,8 @@ namespace gui
     static sf::Sprite nextButton;
     static sf::RectangleShape volumeSlider;
     static sf::CircleShape volumeDot;
+
+
 
     if (!initialized)
     {
@@ -232,9 +249,7 @@ namespace gui
         if (prevButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
           std::cout << "prev" << std::endl;
-          playlist.getSong(indexOfCurrentTrack).pause();
-          indexOfCurrentTrack--;
-          playlist.getSong(indexOfCurrentTrack).playback();
+          rewind(playlist, indexOfCurrentTrack, 0);
           sName.setString(playlist.getSong(indexOfCurrentTrack).get_name());
         }
         else if (playButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
@@ -242,8 +257,8 @@ namespace gui
           std::cout << "play" << std::endl;
           if (!playlist.getSong(indexOfCurrentTrack).get_status())
           {
-            std::cout << playlist.getSong(indexOfCurrentTrack).get_path() + "xd";
-            playlist.getSong(indexOfCurrentTrack).playback();
+            std::cout << playlist.getSong(indexOfCurrentTrack).get_path() + "xd" << '\n';
+            playlist.getSong(indexOfCurrentTrack).playback(playlist.getSong(indexOfCurrentTrack).get_current_time());
           }
           else
           {
@@ -254,9 +269,7 @@ namespace gui
         else if (nextButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
           std::cout << "next" << std::endl;
-          playlist.getSong(indexOfCurrentTrack).pause();
-          indexOfCurrentTrack++;
-          playlist.getSong(indexOfCurrentTrack).playback();
+          rewind(playlist, indexOfCurrentTrack, 1);
           sName.setString(playlist.getSong(indexOfCurrentTrack).get_name());
         }
 
@@ -338,8 +351,7 @@ namespace gui
           {
             playlist.getSong(indexOfCurrentTrack).pause();
             indexOfCurrentTrack = i;
-            playlist.getSong(indexOfCurrentTrack).playback();
-            
+            playlist.getSong(indexOfCurrentTrack).playback(playlist.getSong(indexOfCurrentTrack).get_current_time());
             sName.setString(playlist.getSong(indexOfCurrentTrack).get_name());
             break;
           }

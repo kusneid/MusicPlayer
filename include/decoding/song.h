@@ -21,14 +21,15 @@ public:
     bool operator==(const Song &track) const;
 
     bool get_status() const;
-    void set_name(const std::string &name_);
     std::string get_name() const;
+    sf::Time get_current_time();
 
+    void set_name(const std::string &name_);
     void set_path(const std::string &path_); 
     std::string get_path() const;           
     bool empty() const;
 
-    void playback();
+    void playback(sf::Time current_time);
     void pause();
     sf::Music &get_sfMusic();
 };
