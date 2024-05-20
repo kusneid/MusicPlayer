@@ -1,6 +1,12 @@
 #include "ui/ui.h"
 #include "decoding/album.h"
 #include "decoding/song.h"
+#include <windows.h>
+#include <iostream>
+#include <ShellApi.h>
+#include <shlobj.h>
+#include <stdio.h>
+#include <Commdlg.h>
 
 Album playlist;
 
@@ -340,8 +346,8 @@ namespace gui
       }
       else if (searchByYoutubeButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
       {
-        // ф-ия поиска по ютубу
-        std::cout << "youtube";
+        std::string query_name = "https://www.youtube.com/results?search_query="+playlist.getSong(indexOfCurrentTrack).get_name();
+        ShellExecute(0, 0, query_name.c_str(), NULL, NULL, SW_SHOW);
       }
       else
       {
