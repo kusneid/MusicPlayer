@@ -1,15 +1,15 @@
 // объявление класса и методов песни, мб здесь кстати заюзать шаблонный метод, чекай переписку гпт(т.е. использовать здесь перегруженный метод плей от разных классов типа mp3song wavsong flacsong), опционально добавить закладки(мне для этого отдельный список надо будет реализовать)
+#pragma once
+
 #include <string>
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
-#include "ui/ui.h"
 class Song{
     sf::Music music;
     std::string name;
     bool isPlaying;
 
     
-    friend int CurrentTrackControlGUI(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager, sf::Event &event);
 public:
     Song();
     Song(const std::string &name_);

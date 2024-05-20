@@ -1,5 +1,6 @@
 #include "ui/ui.h"
 #include "decoding/album.h"
+#include "decoding/song.h"
 
 Album playlist;
 std::string name_directory;
@@ -63,9 +64,12 @@ sf::Font &uiResources::ResourceManager::GetFont()
 
 namespace gui
 {
+
+  GUISong::GUISong(Song s, sf::Text t) : songClass(s), songNameSF(t) {}
+
   int GUIRenderBase(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager)
   {
-  
+
     playlist.getMusicFiles("../../Music"); // забираем названия песен
     for (int j = 0; j < playlist.getSize(); j++)
     {
@@ -230,11 +234,13 @@ namespace gui
         else if (playButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
           std::cout << "play" << std::endl;
-          if (!playlist.getSong(i).get_status()){
-              playlist.getSong(i).playback(name_directory);
+          if (!playlist.getSong(i).get_status())
+          {
+            playlist.getSong(i).playback(name_directory);
           }
-          else{
-              playlist.getSong(i).pause();
+          else
+          {
+            playlist.getSong(i).pause();
           }
           sName.setString(playlist.getSong(i).get_name()); // меняет название в интерфейсе слева сверху
         }
@@ -244,7 +250,7 @@ namespace gui
           playlist.getSong(i).pause();
           i++;
           playlist.getSong(i).playback(name_directory);
-           sName.setString(playlist.getSong(i).get_name());
+          sName.setString(playlist.getSong(i).get_name());
         }
 
         sliderPressed = false;
@@ -266,18 +272,22 @@ namespace gui
   {
     static sf::Sprite openFolderButton(resourceManager.GetTexture("open_folder"));
     static sf::RectangleShape boundaryLine(sf::Vector2f(window.getSize().x, 3.f));
+    static sf::Sprite searchByYoutubeButton(resourceManager.GetTexture("youtube"));
 
     static bool initialized = false;
     static float scrollOffset = 0.f;
     static float maxScrollOffset = 0.f;
 
-    static std::vector<sf::Text> trackTexts;
-    static std::vector<sf::RectangleShape> trackBoundaries;
+    static std::vector<GUISong> trackListGUI;
 
     if (!initialized)
     {
       openFolderButton.setPosition(30.f, window.getSize().y - 100.f);
       openFolderButton.setScale(DEFAULT_BUTTON_SIZE / openFolderButton.getTexture()->getSize().x, DEFAULT_BUTTON_SIZE / openFolderButton.getTexture()->getSize().y);
+
+      searchByYoutubeButton.setPosition(30.f, window.getSize().y - 160.f);
+      searchByYoutubeButton.setScale(DEFAULT_BUTTON_SIZE / openFolderButton.getTexture()->getSize().x, DEFAULT_BUTTON_SIZE / openFolderButton.getTexture()->getSize().y);
+
 
       boundaryLine.setFillColor(sf::Color::Blue);
       boundaryLine.setPosition(0.f, BOTTOM_LINE * 3.5);
@@ -290,38 +300,46 @@ namespace gui
       sf::Vector2i mousePos = sf::Mouse::getPosition(window);
       if (openFolderButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
       {
-        
-        trackTexts.clear();
-        trackBoundaries.clear();
+        trackListGUI.clear();
 
-        std::vector<std::string> trackList = {"Track 1", "Track 2", "Track 3", "Track 4", "Track 5", "Track 6", "Track 7", "Track 8", "Track 9", "Track 10"};
-        for (const auto &j : playlist.getList())
+        for (size_t i = 0; i < playlist.getSize(); ++i)
         {
-          trackList.push_back(j.get_name());
+          Song song = playlist.getSong(i);
+          sf::Text songName(song.get_name(), resourceManager.GetFont(), 30);
+          trackListGUI.push_back(GUISong(song, songName));
         }
 
         float yOffset = boundaryLine.getPosition().y + 50.f;
-        for (size_t i = 0; i < trackList.size(); ++i)
+        for (size_t i = 0; i < trackListGUI.size(); ++i)
         {
-          sf::Text text(trackList[i], resourceManager.GetFont(), 30);
-          text.setFillColor(sf::Color::Black); 
-          text.setPosition(400.f, yOffset + i * 40.f);
-          trackTexts.push_back(text);
-
-          sf::RectangleShape trackBoundary(sf::Vector2f(600.f, 2.f));  
-          trackBoundary.setFillColor(sf::Color::Black);                
-          trackBoundary.setPosition(400.f, yOffset + i * 40.f + 35.f);
-          trackBoundaries.push_back(trackBoundary);
+          trackListGUI[i].songNameSF.setFillColor(sf::Color::Black);
+          trackListGUI[i].songNameSF.setPosition(400.f, yOffset + i * 40.f);
         }
 
-        maxScrollOffset = std::max(0.f, yOffset + trackList.size() * 40.f - window.getSize().y + 150.f);
+        maxScrollOffset = std::max(0.f, yOffset + trackListGUI.size() * 40.f - window.getSize().y + 150.f);
         scrollOffset = 0.f;
+      }
+      else if (searchByYoutubeButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
+      {
+        //ф-ия поиска по ютубу
+      }
+      else
+      {
+        for (auto &track : trackListGUI)
+        {
+          if (track.songNameSF.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
+          {
+            //track.songClass.playback("path_to_music_directory");
+            std::cout<<track.songClass.get_name();
+            break;
+          }
+        }
       }
     }
 
     if (event.type == sf::Event::MouseWheelScrolled)
     {
-      scrollOffset += event.mouseWheelScroll.delta * -10.f; 
+      scrollOffset += event.mouseWheelScroll.delta * -10.f;
       if (scrollOffset < 0)
       {
         scrollOffset = 0;
@@ -332,15 +350,18 @@ namespace gui
       }
     }
 
-    for (size_t i = 0; i < trackTexts.size(); ++i)
+    for (size_t i = 0; i < trackListGUI.size(); ++i)
     {
       float textY = boundaryLine.getPosition().y + 50.f - scrollOffset + i * 40.f;
       if (textY > 175.f && textY < window.getSize().y)
       {
-        trackTexts[i].setPosition(400.f, textY);
-        trackBoundaries[i].setPosition(400.f, textY + 35.f);
-        window.draw(trackTexts[i]);
-        window.draw(trackBoundaries[i]);
+        trackListGUI[i].songNameSF.setPosition(400.f, textY);
+        window.draw(trackListGUI[i].songNameSF);
+
+        sf::RectangleShape trackBoundary(sf::Vector2f(600.f, 2.f));
+        trackBoundary.setFillColor(sf::Color::Black);
+        trackBoundary.setPosition(400.f, textY + 35.f);
+        window.draw(trackBoundary);
       }
     }
 

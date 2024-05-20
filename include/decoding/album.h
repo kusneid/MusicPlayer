@@ -1,4 +1,6 @@
 //объявление класса и методов альбома
+#pragma once
+
 #include "song.h"
 #include <vector>
 
