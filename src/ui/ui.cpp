@@ -3,8 +3,10 @@
 #include "decoding/song.h"
 
 Album playlist;
-std::string name_directory;
-int i = 0;
+
+int indexOfCurrentTrack = 0;
+
+std::string currentDirectory = "../../Music";
 
 uiResources::ResourceManager::ResourceManager()
 {
@@ -70,7 +72,7 @@ namespace gui
   int GUIRenderBase(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager)
   {
 
-    playlist.getMusicFiles("../../Music"); // забираем названия песен
+    playlist.getMusicFiles(currentDirectory); // забираем названия песен
     for (int j = 0; j < playlist.getSize(); j++)
     {
       std::cout << playlist.getSong(j).get_name() << '\n';
@@ -108,17 +110,21 @@ namespace gui
       window.clear(sf::Color::Black);
       window.draw(backgroundSprite);
 
-      if (PlaylistsGUI(window, resourceManager, event) != 0)
+      static sf::Text sName;
+
+      if (CurrentTrackControlGUI(window, resourceManager, event,sName) != 0)
       {
         throw std::runtime_error("unable to render gui of track control");
         return -1;
       }
 
-      if (CurrentTrackControlGUI(window, resourceManager, event) != 0)
+      if (PlaylistsGUI(window, resourceManager, event,sName) != 0)
       {
         throw std::runtime_error("unable to render gui of track control");
         return -1;
       }
+
+      
 
       window.display();
     }
@@ -126,7 +132,7 @@ namespace gui
     return 0;
   }
 
-  int CurrentTrackControlGUI(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager, sf::Event &event)
+  int CurrentTrackControlGUI(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager, sf::Event &event,sf::Text& sName)
   {
     static bool initialized = false;
     static float volumeDotCurrentX = 0.0f;
@@ -135,7 +141,7 @@ namespace gui
     static bool mousePressed = false;
     static bool sliderPressed = false;
 
-    static sf::Text sName;
+    //static sf::Text sName;
     static sf::Sprite prevButton;
     static sf::Sprite playButton;
     static sf::Sprite nextButton;
@@ -202,7 +208,7 @@ namespace gui
       volumeDotCurrentX = newX;
 
       float volumeLevel = (newX - sliderStartX) / (sliderEndX - sliderStartX);
-      playlist.getSong(i).get_sfMusic().setVolume(volumeLevel * 200);
+      playlist.getSong(indexOfCurrentTrack).get_sfMusic().setVolume(volumeLevel * 100);
     }
 
     volumeDot.setPosition(volumeDotCurrentX, volumeDot.getPosition().y);
@@ -226,31 +232,32 @@ namespace gui
         if (prevButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
           std::cout << "prev" << std::endl;
-          playlist.getSong(i).pause();
-          i--;
-          playlist.getSong(i).playback(name_directory);
-          sName.setString(playlist.getSong(i).get_name());
+          playlist.getSong(indexOfCurrentTrack).pause();
+          indexOfCurrentTrack--;
+          playlist.getSong(indexOfCurrentTrack).playback();
+          sName.setString(playlist.getSong(indexOfCurrentTrack).get_name());
         }
         else if (playButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
           std::cout << "play" << std::endl;
-          if (!playlist.getSong(i).get_status())
+          if (!playlist.getSong(indexOfCurrentTrack).get_status())
           {
-            playlist.getSong(i).playback(name_directory);
+            std::cout << playlist.getSong(indexOfCurrentTrack).get_path() + "xd";
+            playlist.getSong(indexOfCurrentTrack).playback();
           }
           else
           {
-            playlist.getSong(i).pause();
+            playlist.getSong(indexOfCurrentTrack).pause();
           }
-          sName.setString(playlist.getSong(i).get_name()); // меняет название в интерфейсе слева сверху
+          sName.setString(playlist.getSong(indexOfCurrentTrack).get_name()); // меняет название в интерфейсе слева сверху
         }
         else if (nextButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
         {
           std::cout << "next" << std::endl;
-          playlist.getSong(i).pause();
-          i++;
-          playlist.getSong(i).playback(name_directory);
-          sName.setString(playlist.getSong(i).get_name());
+          playlist.getSong(indexOfCurrentTrack).pause();
+          indexOfCurrentTrack++;
+          playlist.getSong(indexOfCurrentTrack).playback();
+          sName.setString(playlist.getSong(indexOfCurrentTrack).get_name());
         }
 
         sliderPressed = false;
@@ -268,7 +275,7 @@ namespace gui
     return 0;
   }
 
-  int PlaylistsGUI(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager, sf::Event &event)
+  int PlaylistsGUI(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager, sf::Event &event, sf::Text& sName)
   {
     static sf::Sprite openFolderButton(resourceManager.GetTexture("open_folder"));
     static sf::RectangleShape boundaryLine(sf::Vector2f(window.getSize().x, 3.f));
@@ -285,9 +292,8 @@ namespace gui
       openFolderButton.setPosition(30.f, window.getSize().y - 100.f);
       openFolderButton.setScale(DEFAULT_BUTTON_SIZE / openFolderButton.getTexture()->getSize().x, DEFAULT_BUTTON_SIZE / openFolderButton.getTexture()->getSize().y);
 
-      searchByYoutubeButton.setPosition(30.f, window.getSize().y - 160.f);
+      searchByYoutubeButton.setPosition(30.f, window.getSize().y - 180.f);
       searchByYoutubeButton.setScale(DEFAULT_BUTTON_SIZE / openFolderButton.getTexture()->getSize().x, DEFAULT_BUTTON_SIZE / openFolderButton.getTexture()->getSize().y);
-
 
       boundaryLine.setFillColor(sf::Color::Blue);
       boundaryLine.setPosition(0.f, BOTTOM_LINE * 3.5);
@@ -321,16 +327,20 @@ namespace gui
       }
       else if (searchByYoutubeButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
       {
-        //ф-ия поиска по ютубу
+        // ф-ия поиска по ютубу
+        std::cout << "youtube";
       }
       else
       {
-        for (auto &track : trackListGUI)
+        for (size_t i = 0; i < trackListGUI.size(); ++i)
         {
-          if (track.songNameSF.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
+          if (trackListGUI[i].songNameSF.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
           {
-            //track.songClass.playback("path_to_music_directory");
-            std::cout<<track.songClass.get_name();
+            playlist.getSong(indexOfCurrentTrack).pause();
+            indexOfCurrentTrack = i;
+            playlist.getSong(indexOfCurrentTrack).playback();
+            
+            sName.setString(playlist.getSong(indexOfCurrentTrack).get_name());
             break;
           }
         }
@@ -365,6 +375,7 @@ namespace gui
       }
     }
 
+    window.draw(searchByYoutubeButton);
     window.draw(openFolderButton);
     window.draw(boundaryLine);
 

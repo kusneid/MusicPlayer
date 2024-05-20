@@ -3,58 +3,63 @@
 #include <SFML/Audio.hpp>
 #include <iostream>
 
-Song::Song() {
-    isPlaying = false;
-    name = "";
-}
-Song::Song(const std::string &name_) {
-    isPlaying = false;
-    name = name_;
-}
-Song::Song(const Song &track) {
-    name = track.name;
-    isPlaying = false;
-}
+Song::Song() : isPlaying(false), name(""), path("") {}
 
-Song Song::operator=(const Song &track) {
-    name = track.name;
-    isPlaying = false;
+Song::Song(const std::string &name_) : isPlaying(false), name(name_), path("") {}
+
+Song::Song(const Song &track) : name(track.name), path(track.path), isPlaying(track.isPlaying) {}
+
+Song &Song::operator=(const Song &track) {
+    if (this != &track) {
+        name = track.name;
+        path = track.path;
+        isPlaying = track.isPlaying;
+    }
     return *this;
 }
-bool Song::operator==(const Song &track) {
-    return (name == track.name);
+
+bool Song::operator==(const Song &track) const {
+    return (name == track.name && path == track.path);
 }
 
-bool Song::get_status() {
+bool Song::get_status() const {
     return isPlaying;
 }
+
 void Song::set_name(const std::string &name_) {
     name = name_;
 }
-std::string Song::get_name() const{
+
+std::string Song::get_name() const {
     return name;
 }
-bool Song::empty() {
-    if (name == ""){
-        return true;
-    }
-    return false;
+
+void Song::set_path(const std::string &path_) {
+    path = path_;
 }
 
+std::string Song::get_path() const {
+    return path;
+}
 
-void Song::playback(const std::string &name_directory) {
-    if (!music.openFromFile(name_directory + "\\" + name + ".flac") && !music.openFromFile(name_directory + "\\" + name + ".ogg")){
+bool Song::empty() const {
+    return name.empty();
+}
+
+void Song::playback() {
+    if (!music.openFromFile(path)) {
         std::cout << "Song not found!\n";
         return;
     }
     music.play();
     isPlaying = true;
 }
-void Song::pause(){
+
+void Song::pause() {
     music.pause();
     isPlaying = false;
 }
 
-sf::Music& Song::get_sfMusic(){
+sf::Music &Song::get_sfMusic() {
     return music;
 }

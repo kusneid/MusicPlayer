@@ -36,13 +36,13 @@ namespace uiResources
 namespace gui
 {
   int GUIRenderBase(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager);
-  int CurrentTrackControlGUI(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager, sf::Event &event);
-  int PlaylistsGUI(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager, sf::Event &event);
+  int CurrentTrackControlGUI(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager, sf::Event &event,sf::Text& sName);
+  int PlaylistsGUI(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager, sf::Event &event, sf::Text& sName);
   int UpdatePlaylist(sf::RenderWindow &window);
 
   class GUISong
   {
-    friend int PlaylistsGUI(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager, sf::Event &event);
+    friend int PlaylistsGUI(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager, sf::Event &event, sf::Text& sName);
 
     Song songClass;
     sf::Text songNameSF;
