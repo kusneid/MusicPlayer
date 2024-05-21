@@ -10,4 +10,6 @@ namespace additional
 {
   std::string SelectFolder();
   std::string ConvertBackslashesToSlashes(const std::string& path);
+  std::string ReplaceNullWithSlash(const std::string& path);
+  std::string RemoveBackslashAndZero(const std::string& input);
 }

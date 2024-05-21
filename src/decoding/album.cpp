@@ -1,4 +1,6 @@
 #include "decoding/album.h"
+#include "org/additional.h"
+
 #include <filesystem>
 #include <string>
 #include <iostream>
@@ -35,20 +37,25 @@ void Album::getMusicFiles(const std::string &directory)
     std::string extension, buf;
     for (const auto &entry : fs::directory_iterator(directory))
     {
-        if (entry.is_regular_file())
-        {
-        }
         extension = entry.path().extension().string();
         if (extension == ".ogg" || extension == ".flac")
         { // здесь указываем расширения, с которыми будет работать наш плеер
             Song track;
             track.set_name(entry.path().stem().string());
             // std::cout<<entry.path().string();
-            track.set_path(entry.path().string());
-            // std::cout<<track.get_path()+"\n";
+            buf = additional::ConvertBackslashesToSlashes(entry.path().string());
+            track.set_path(buf);
+        
+            std::string trackName = track.get_name();
+            std::replace(trackName.begin(), trackName.end(), '\\', '/');
+            track.set_name(trackName);
+            
+            std::cout<<track.get_path()+"\n";
             list.push_back(track);
         }
     }
+
+
 }
 
 std::vector<Song> Album::getList()

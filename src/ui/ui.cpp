@@ -15,7 +15,7 @@ Album playlist;
 
 int indexOfCurrentTrack = 0;
 
-std::string currentDirectory = "C:/Users/kusneid/Documents/MusicPlayer/Music";
+static std::string currentDirectory = "C:/Users/kusneid/Documents/MusicPlayer/Music";
 
 uiResources::ResourceManager::ResourceManager()
 {
@@ -101,7 +101,12 @@ namespace gui
   int GUIRenderBase(sf::RenderWindow &window, uiResources::ResourceManager &resourceManager)
   {
 
+    
+    
     playlist.getMusicFiles(currentDirectory); // забираем названия песен
+    
+    
+    
     for (int j = 0; j < playlist.getSize(); j++)
     {
       std::cout << playlist.getSong(j).get_name() << '\n';
@@ -340,11 +345,12 @@ namespace gui
         playlist.getSong(indexOfCurrentTrack).pause();
 
 
-        currentDirectory = additional::ConvertBackslashesToSlashes(additional::SelectFolder());
-
-        std::cout << currentDirectory+'\n';
+        // currentDirectory = additional::ConvertBackslashesToSlashes(additional::SelectFolder());
+        // currentDirectory = additional::RemoveBackslashAndZero(currentDirectory)+'/';
+        // std::cout << currentDirectory+'\n';
 
         trackListGUI.clear();
+
 
         playlist.getMusicFiles(currentDirectory);
 
@@ -380,6 +386,7 @@ namespace gui
             indexOfCurrentTrack = i;
             playlist.getSong(indexOfCurrentTrack).playback(playlist.getSong(indexOfCurrentTrack).get_current_time());
             sName.setString(playlist.getSong(indexOfCurrentTrack).get_name());
+            
             break;
           }
         }
