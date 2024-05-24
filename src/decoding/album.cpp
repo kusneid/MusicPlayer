@@ -34,23 +34,16 @@ void Album::delete_track(const Song &track)
 void Album::getMusicFiles(const std::string &directory)
 {
     list.clear();
-    std::string extension, buf;
-    for (const auto &entry : fs::directory_iterator(directory))
+    std::string extension;
+    for (const auto &entry : std::filesystem::directory_iterator(directory))
     {
         extension = entry.path().extension().string();
-        if (extension == ".ogg" || extension == ".flac")
-        { // здесь указываем расширения, с которыми будет работать наш плеер
+        if (extension == ".ogg" || extension == ".flac") {
             Song track;
+            std::string path = entry.path().string();
+            std::replace(path.begin(), path.end(), '\\', '/');
+            track.set_path(path);
             track.set_name(entry.path().stem().string());
-            // std::cout<<entry.path().string();
-            buf = additional::ConvertBackslashesToSlashes(entry.path().string());
-            track.set_path(buf);
-        
-            std::string trackName = track.get_name();
-            std::replace(trackName.begin(), trackName.end(), '\\', '/');
-            track.set_name(trackName);
-            
-            std::cout<<track.get_path()+"\n";
             list.push_back(track);
         }
     }

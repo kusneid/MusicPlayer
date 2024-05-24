@@ -6,16 +6,11 @@
 #include <iostream>
 #include <ShellApi.h>
 
-// #include <windows.h>
-// #include <shlobj.h>
-// #include <stdio.h>
-// #include <Commdlg.h>
-
 Album playlist;
 
 int indexOfCurrentTrack = 0;
 
-static std::string currentDirectory = "C:/Users/kusneid/Documents/MusicPlayer/Music";
+static std::string currentDirectory = "C:/Users/kusneid/Music/Low Roar - ross";//сюда вставлять путь с треками
 
 uiResources::ResourceManager::ResourceManager()
 {
@@ -106,12 +101,6 @@ namespace gui
     playlist.getMusicFiles(currentDirectory); // забираем названия песен
     
     
-    
-    for (int j = 0; j < playlist.getSize(); j++)
-    {
-      std::cout << playlist.getSong(j).get_name() << '\n';
-    }
-
     bool iconLoaded = false;
     if (!iconLoaded)
     {
@@ -173,7 +162,6 @@ namespace gui
     static bool mousePressed = false;
     static bool sliderPressed = false;
 
-    // static sf::Text sName;
     static sf::Sprite prevButton;
     static sf::Sprite playButton;
     static sf::Sprite nextButton;
@@ -340,14 +328,12 @@ namespace gui
       sf::Vector2i mousePos = sf::Mouse::getPosition(window);
       if (openFolderButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
       {
-        // jneuhobufgbaueghuiaeguehureguiheugberugbeugbegyubeug
 
         playlist.getSong(indexOfCurrentTrack).pause();
 
 
-        // currentDirectory = additional::ConvertBackslashesToSlashes(additional::SelectFolder());
-        // currentDirectory = additional::RemoveBackslashAndZero(currentDirectory)+'/';
-        // std::cout << currentDirectory+'\n';
+        //currentDirectory = additional::SelectFolder();
+        //На момент коммита я так и не смог приделать эту фичу, проблема в слэшах была решена через ф-ии в additional, однако всё равно треки вне проекта не открываются
 
         trackListGUI.clear();
 
