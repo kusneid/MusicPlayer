@@ -4,13 +4,12 @@
 #include "org/additional.h"
 
 #include <iostream>
-#include <ShellApi.h>
 
 Album playlist;
 
 int indexOfCurrentTrack = 0;
 
-static std::string currentDirectory = "C:/Users/kusneid/Music/Low Roar - ross";//сюда вставлять путь с треками
+static std::string currentDirectory = "/home/kusneid/Documents/MusicPlayer/Low Roar - ross";//сюда вставлять путь с треками
 
 uiResources::ResourceManager::ResourceManager()
 {
@@ -332,8 +331,9 @@ namespace gui
         playlist.getSong(indexOfCurrentTrack).pause();
 
 
-        //currentDirectory = additional::SelectFolder();
+        currentDirectory = additional::SelectFolder();
         //На момент коммита я так и не смог приделать эту фичу, проблема в слэшах была решена через ф-ии в additional, однако всё равно треки вне проекта не открываются
+        //upd 05.06.2024 я все-таки реализовал это но доступно только на линукс см. Readme.md
 
         trackListGUI.clear();
 
@@ -359,8 +359,20 @@ namespace gui
       }
       else if (searchByYoutubeButton.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
       {
-        std::string query_name = "https://www.youtube.com/results?search_query=" + playlist.getSong(indexOfCurrentTrack).get_name();
-        ShellExecute(0, 0, query_name.c_str(), NULL, NULL, SW_SHOW);
+        std::string currentTrackName = "your current track name";
+
+        std::string base_url = "https://www.youtube.com/results?search_query=";
+        std::string query = playlist.getSong(indexOfCurrentTrack).get_name();
+
+        for (size_t pos = 0; pos < query.length(); ++pos) {
+            if (query[pos] == ' ') {
+                query[pos] = '+';
+            }
+        }
+        std::string full_url = base_url + query;
+        std::string command = "xdg-open \"" + full_url + "\"";
+
+        std::system(command.c_str());
       }
       else
       {

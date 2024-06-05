@@ -2,43 +2,23 @@
 
 std::string additional::SelectFolder()
 {
-    BROWSEINFOW bi;
-    ZeroMemory(&bi, sizeof(bi));
-    WCHAR path[MAX_PATH];
+    std::array<char, 128> buffer;
+    std::string result;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen("kdialog --getexistingdirectory .", "r"), pclose);
 
-    bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
-    bi.lpszTitle = L"Select Folder";
-    bi.pszDisplayName = path;
-    bi.hwndOwner = NULL;
-
-    LPITEMIDLIST pidl = SHBrowseForFolderW(&bi);
-    if (pidl != 0)
-    {
-
-        if (SHGetPathFromIDListW(pidl, path))
-        {
-
-            int len = WideCharToMultiByte(CP_UTF8, 0, path, -1, NULL, 0, NULL, NULL);
-            std::string folderPath(len, '\0');
-            WideCharToMultiByte(CP_UTF8, 0, path, -1, &folderPath[0], len, NULL, NULL);
-
-            return folderPath;
-        }
+    if (!pipe) {
+        throw std::runtime_error("popen() failed!");
     }
 
-    return std::string("");
-}
-
-std::string additional::ConvertBackslashesToSlashes(std::string &path)
-{
-
-    for (size_t i = 0; i < path.length(); ++i)
-    {
-        if (path[i] == '\\')
-        {
-            path[i] = '/';
-        }
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+        result += buffer.data();
     }
 
-    return path;
+    
+    if (!result.empty() && result.back() == '\n') {
+        result.pop_back();
+    }
+
+    return result;
 }
+

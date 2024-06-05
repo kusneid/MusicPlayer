@@ -1,13 +1,13 @@
 #pragma once
 
-#include <windows.h>
-#include <shlobj.h>
-#include <string>
+
 #include <iostream>
-#include <algorithm>
+#include <string>
+#include <array>
+#include <memory>
+
 
 namespace additional
 {
   std::string SelectFolder();
-  std::string ConvertBackslashesToSlashes(std::string& path);
 }
