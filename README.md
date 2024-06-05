@@ -33,3 +33,5 @@
    cmake --build build
    cd build
    ./MusicPlayer
+
+P.S. Выбор папки через интерфейс работает только на Linux системах, для него необходимо установить kdialog
